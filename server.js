@@ -1,5 +1,6 @@
 const { animals } = require('./data/animals');
 const express = require('express')
+    //enviromental variable for heroku
 const PORT = process.env.PORT || 3001
     //assigned to variable so that methods can be chained to the express server
 const app = express()
@@ -43,7 +44,7 @@ function filterByQuery(query, animalsArray) {
     }
     return filteredResults;
 }
-//route that front end request from
+
 app.get('/api/animals', (req, res) => {
     let results = animals
     if (req.query) {
@@ -51,6 +52,11 @@ app.get('/api/animals', (req, res) => {
     }
     res.json(results)
 });
+//param route must come after 
+app.get('/api/animals/:id', (req,res) => {
+    const results = findById(req.params.id, animals)
+    res.json(results)
+})
 
 app.listen(PORT, () => {
     console.log(`api server now on port ${PORT}`)
