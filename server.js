@@ -2,8 +2,9 @@ const fs = require('fs');
 const path = require('path');
 
 const { animals } = require('./data/animals');
-const express = require('express')
-    //enviromental variable for heroku
+const express = require('express');
+const { allowedNodeEnvironmentFlags } = require('process');
+//enviromental variable for heroku
 const PORT = process.env.PORT || 3001
     //assigned to variable so that methods can be chained to the express server
 const app = express()
@@ -11,6 +12,8 @@ const app = express()
 app.use(express.urlencoded({ extended: true }));
 // parse incoming JSON data
 app.use(express.json());
+//grabs static assets from public directory
+app.use(express.static('public'))
 
 //code
 
@@ -103,19 +106,31 @@ app.get('/api/animals/:id', (req, res) => {
 })
 
 app.post('/api/animals', (req, res) => {
-    // set id based on what the next index of the array will be
-    req.body.id = animals.length.toString();
+        // set id based on what the next index of the array will be
+        req.body.id = animals.length.toString();
 
-    // if any data in req.body is incorrect, send 400 error back
-    if (!validateAnimal(req.body)) {
-        res.status(400).send('The animal is not properly formatted.');
-    } else {
-        //add animal to json file and animals array in this function
-        const animal = createNewAnimal(req.body, animals)
-        res.json(animal)
-    }
-})
-
+        // if any data in req.body is incorrect, send 400 error back
+        if (!validateAnimal(req.body)) {
+            res.status(400).send('The animal is not properly formatted.');
+        } else {
+            //add animal to json file and animals array in this function
+            const animal = createNewAnimal(req.body, animals)
+            res.json(animal)
+        }
+    })
+    //creates a homepage for the server
+app.get('/', (req, res) => {
+        res.sendFile(path.join(__dirname, './public/index.html'))
+    })
+    // server gets animal html 
+app.get('/animals', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+//server gets zookeeper html
+app.get('/zookeepers', (req, res) => {
+        res.sendFile(path.join(__dirname, './public/zookeepers.html'))
+    })
+    //app.listen should always be last
 app.listen(PORT, () => {
     console.log(`API server now on port ${PORT}!`);
 });
